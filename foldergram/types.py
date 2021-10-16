@@ -120,3 +120,6 @@ class Bot:
     def get_command(self, name):
         if name in self.commands:
             return self.commands[self.commands.index(name)]
+
+    def get_command_names(self):
+        return [cmd.name for cmd in self.commands]
