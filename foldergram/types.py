@@ -14,6 +14,7 @@ logging.basicConfig(
 
 COMMAND_DIR = 'commands'
 TOKEN_FILE = 'token.txt'
+ENCODING = 'utf-8'
 
 
 class Attachment:
@@ -34,7 +35,7 @@ class Attachment:
         # get description
         desc_file = os.path.join(self.file_path, os.path.splitext(self.file_path)[0]) + '.txt'
         if os.path.isfile(desc_file) and desc_file != self.file_path:
-            with open(desc_file) as f:
+            with open(desc_file, encoding=ENCODING) as f:
                 self.description = f.read()
 
         # guess type file
@@ -56,6 +57,14 @@ class Command:
 
         self._parse()
 
+    def __eq__(self, other):
+        if self.name == other or self.full_name == other:
+            return True
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def _parse(self):
         folders, files = sort_like_explorer(self.command_path)
 
@@ -69,7 +78,7 @@ class Command:
 
         # read message in folder of command
         if os.path.isfile(os.path.join(self.command_path, self.name + '.txt')):
-            with open(os.path.join(self.command_path, self.name + '.txt')) as msg_file:
+            with open(os.path.join(self.command_path, self.name + '.txt'), encoding=ENCODING) as msg_file:
                 self.message = msg_file.read()
             logging.debug(f"[class Command] length message: {len(self.message)}")
             files.remove(self.name + '.txt')
@@ -85,10 +94,9 @@ class Bot:
         self.token = None
         self.commands = []
 
-        logging.debug(f"[class Bot] {self.root_path=}")
-
         self._parse()
 
+        logging.debug(f"[class Bot] {self.root_path=}")
         logging.debug(f"[class Bot] {self.commands=}")
         logging.debug(f"[class Bot] {self.token=}")
 
@@ -96,7 +104,7 @@ class Bot:
         token = None
         if os.path.isfile(os.path.join(self.root_path, TOKEN_FILE)):
             logging.debug(f"[class Bot._get_token] file exists")
-            with open(os.path.join(self.root_path, TOKEN_FILE)) as token_file:
+            with open(os.path.join(self.root_path, TOKEN_FILE), encoding=ENCODING) as token_file:
                 token = token_file.read().strip()
         return token
 
@@ -109,4 +117,6 @@ class Bot:
         logging.debug(f"[class Bot] {folders=}")
         self.commands = [Command(os.path.join(self.root_path, COMMAND_DIR, folder)) for folder in folders]
 
-
+    def get_command(self, name):
+        if name in self.commands:
+            return self.commands[self.commands.index(name)]
