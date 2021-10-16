@@ -1,2 +1,5 @@
 /venv
 /.idea
+/foldergram/__pycache__/
+main.py
+log.txt
