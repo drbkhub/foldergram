@@ -7,6 +7,7 @@ import logging
 logging.basicConfig(
     filename='log.txt',
     filemode='w',
+    encoding='utf-8',
     format='%(filename)s - %(levelname)s - %(message)s',
     level=logging.DEBUG
 )
@@ -94,9 +95,10 @@ class Bot:
         self.token = None
         self.commands = []
 
+        logging.debug(f"[class Bot] {self.root_path=}")
+
         self._parse()
 
-        logging.debug(f"[class Bot] {self.root_path=}")
         logging.debug(f"[class Bot] {self.commands=}")
         logging.debug(f"[class Bot] {self.token=}")
 
