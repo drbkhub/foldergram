@@ -66,6 +66,13 @@ class Command:
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    @classmethod
+    def parse_commands(cls, root_path):
+        # folders are contain "commands"
+        folders, _ = sort_like_explorer(os.path.join(root_path, COMMAND_DIR))
+        logging.debug(f"[class Command] {folders=}")
+        return [cls(os.path.join(root_path, COMMAND_DIR, folder)) for folder in folders]
+
     def _parse(self):
         folders, files = sort_like_explorer(self.command_path)
 
@@ -114,10 +121,7 @@ class Bot:
         # get token if file exists
         self.token = self._get_token()
 
-        # folders are contain "commands"
-        folders, _ = sort_like_explorer(os.path.join(self.root_path, COMMAND_DIR))
-        logging.debug(f"[class Bot] {folders=}")
-        self.commands = [Command(os.path.join(self.root_path, COMMAND_DIR, folder)) for folder in folders]
+        self.commands = Command.parse_commands(self.root_path)
 
     def get_command(self, name):
         if name in self.commands:
