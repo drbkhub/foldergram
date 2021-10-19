@@ -44,6 +44,23 @@ class Attachment:
         if mime_type:
             if mime_type.split('/')[0] in self.types:
                 self.type = mime_type.split('/')[0]
+    
+    @classmethod
+    def parse_attachments(cls, command_path, files):
+
+        # clean from description files 
+        files_tmp = [os.path.splitext(item)[0] for item in files]
+        for item in set(files_tmp):
+            if files_tmp.count(item) > 1:
+                if os.path.isfile(os.path.join(command_path, item + '.txt')):
+                    files.remove(item + '.txt')
+        del files_tmp
+
+        attachments = []
+        for file in files:
+            logging.debug(f"[class Command] add attach: {file}")
+            attachments.append(Attachment(os.path.join(command_path, file)))
+        return attachments
 
 
 class Command:
@@ -76,25 +93,17 @@ class Command:
     def _parse(self):
         folders, files = sort_like_explorer(self.command_path)
 
-        # clean from description files (we will check it in Attachment)
-        files_tmp = [os.path.splitext(item)[0] for item in files]
-        for item in set(files_tmp):
-            if files_tmp.count(item) > 1:
-                if os.path.isfile(os.path.join(self.command_path, item + '.txt')):
-                    files.remove(item + '.txt')
-        del files_tmp
-
         # read message in folder of command
         if os.path.isfile(os.path.join(self.command_path, self.name + '.txt')):
             with open(os.path.join(self.command_path, self.name + '.txt'), encoding=ENCODING) as msg_file:
                 self.message = msg_file.read()
             logging.debug(f"[class Command] length message: {len(self.message)}")
+            # Remove the file from the list to prevent it from being in the final sample
             files.remove(self.name + '.txt')
 
-        for attach in files:
-            logging.debug(f"[class Command] add attach: {attach}")
-            self.attachments.append(Attachment(os.path.join(self.command_path, attach)))
-
+        # parse attachment 
+        # we also send files because need to clean of list of files a message file...
+        self.attachments = Attachment.parse_attachments(self.command_path, files)
 
 class Bot:
     def __init__(self, root_path):
@@ -120,7 +129,7 @@ class Bot:
     def _parse(self):
         # get token if file exists
         self.token = self._get_token()
-
+        # parse commdands
         self.commands = Command.parse_commands(self.root_path)
 
     def get_command(self, name):
