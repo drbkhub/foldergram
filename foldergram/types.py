@@ -15,6 +15,7 @@ logging.basicConfig(
 
 COMMAND_DIR = 'commands'
 TOKEN_FILE = 'token.txt'
+PROXY_FILE = 'proxy.txt'
 ENCODING = 'utf-8'
 
 
@@ -109,6 +110,7 @@ class Bot:
     def __init__(self, root_path):
         self.root_path = os.path.abspath(root_path)
         self.token = None
+        self.proxy = None
         self.commands = []
 
         logging.debug(f"[class Bot] {self.root_path=}")
@@ -126,9 +128,19 @@ class Bot:
                 token = token_file.read().strip()
         return token
 
+    def _get_proxy(self):
+        proxy = None
+        if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)):
+            logging.debug(f"[class Bot._get_proxy] file exists")
+            with open(os.path.join(self.root_path, TOKEN_FILE), encoding=ENCODING) as proxy_file:
+                proxy = proxy_file.read().strip()
+        return proxy
+
     def _parse(self):
         # get token if file exists
         self.token = self._get_token()
+        # get proxy if file exists
+        self.proxy = self._get_proxy()
         # parse commdands
         self.commands = Command.parse_commands(self.root_path)
 
