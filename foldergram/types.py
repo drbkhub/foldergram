@@ -149,5 +149,4 @@ class Bot:
             return self.commands[self.commands.index(name)]
 
     def get_command_names(self):
-        path = os.path.join(self.root_path, COMMAND_DIR)
-        return [item for item in os.listdir(path) if os.path.isdir(os.path.join(path, item))]
+        return [cmd.name for cmd in self.commands]
