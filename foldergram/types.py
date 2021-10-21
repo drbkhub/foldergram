@@ -33,6 +33,10 @@ class Attachment:
         logging.debug(f"[class Attachment] {len(self.description)=}")
         logging.debug(f"[class Attachment] {self.type=}")
 
+    def __str__(self) -> str:
+        return f'Attachment("{self.file_path}")'
+    __repr__ = __str__
+
     def _parse(self):
         # get description
         desc_file = os.path.join(self.file_path, os.path.splitext(self.file_path)[0]) + '.txt'
