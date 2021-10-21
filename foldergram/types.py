@@ -20,7 +20,7 @@ ENCODING = 'utf-8'
 
 
 class Attachment:
-    types = ('image', 'audio', 'video')
+    types = ('image', 'audio', 'video', 'text')
 
     def __init__(self, file_path):
         self.file_path = file_path
@@ -47,7 +47,8 @@ class Attachment:
                 self.type = mime_type.split('/')[0]
     
     @classmethod
-    def parse_attachments(cls, command_path, files):
+    def parse_attachments(cls, command_path):
+        folders, files = sort_like_explorer(command_path)
 
         # clean from description files 
         files_tmp = [os.path.splitext(item)[0] for item in files]
@@ -69,7 +70,6 @@ class Command:
         self.name = os.path.split(command_path)[1]
         self.full_name = '/' + self.name
         self.command_path = command_path
-        self.message = None
         self.attachments = []
 
         logging.debug(f"[class Command] {command_path=}")
@@ -92,19 +92,8 @@ class Command:
         return [cls(os.path.join(root_path, COMMAND_DIR, folder)) for folder in folders]
 
     def _parse(self):
-        folders, files = sort_like_explorer(self.command_path)
-
-        # read message in folder of command
-        if os.path.isfile(os.path.join(self.command_path, self.name + '.txt')):
-            with open(os.path.join(self.command_path, self.name + '.txt'), encoding=ENCODING) as msg_file:
-                self.message = msg_file.read()
-            logging.debug(f"[class Command] length message: {len(self.message)}")
-            # Remove the file from the list to prevent it from being in the final sample
-            files.remove(self.name + '.txt')
-
         # parse attachment 
-        # we also send files because need to clean of list of files a message file...
-        self.attachments = Attachment.parse_attachments(self.command_path, files)
+        self.attachments = Attachment.parse_attachments(self.command_path)
 
 class Bot:
     def __init__(self, root_path):
