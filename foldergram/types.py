@@ -1,4 +1,5 @@
 import os
+import re
 import mimetypes
 from .utils import sort_like_explorer
 
@@ -36,6 +37,14 @@ class Attachment:
     def __str__(self) -> str:
         return f'Attachment("{self.file_path}")'
     __repr__ = __str__
+
+    @property
+    def pretty_name(self):
+        name = os.path.split(self.file_path)[1]
+        prefix = re.findall(r"^\d+[\._ ]\s*", self.file_path)
+        if prefix:
+            return name[len(prefix[0])]
+        return name
 
     def _parse(self):
         # get description
