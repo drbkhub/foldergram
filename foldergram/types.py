@@ -109,10 +109,10 @@ class Command:
         self.attachments = Attachment.parse_attachments(self.command_path)
 
 class Bot:
-    def __init__(self, root_path):
+    def __init__(self, root_path, proxy=None):
         self.root_path = os.path.abspath(root_path)
         self.token = None
-        self.proxy = None
+        self.proxy = proxy
         self.commands = []
 
         logging.debug(f"[class Bot] {self.root_path=}")
@@ -121,6 +121,7 @@ class Bot:
 
         logging.debug(f"[class Bot] {self.commands=}")
         logging.debug(f"[class Bot] {self.token=}")
+        logging.debug(f"[class Bot] {self.proxy=}")
 
     def _get_token(self):
         token = None
@@ -132,9 +133,9 @@ class Bot:
 
     def _get_proxy(self):
         proxy = None
-        if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)):
+        if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)) and self.proxy is not None:
             logging.debug(f"[class Bot._get_proxy] file exists")
-            with open(os.path.join(self.root_path, TOKEN_FILE), encoding=ENCODING) as proxy_file:
+            with open(os.path.join(self.root_path, PROXY_FILE), encoding=ENCODING) as proxy_file:
                 proxy = proxy_file.read().strip()
         return proxy
 
