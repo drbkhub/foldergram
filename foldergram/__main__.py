@@ -9,4 +9,4 @@ args = parser.parse_args()
 
 print(args)
 
-bot.start(args.bot, args.proxy)
+bot.start(args.bot, args.proxy, args.token)
