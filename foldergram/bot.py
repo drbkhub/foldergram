@@ -2,8 +2,8 @@ import aiogram
 from .types import Bot
 from .utils import group_media
 
-def start(bot, proxy=None):
-    fg_bot = Bot(bot, proxy=proxy)
+def start(bot, proxy=None, token=None):
+    fg_bot = Bot(bot, proxy=proxy, token=token)
     ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
     dp = aiogram.Dispatcher(ai_bot)
 
