@@ -10,7 +10,6 @@ def start(bot, proxy=None, token=None):
     print(fg_bot.get_command_names())
     @dp.message_handler(commands=fg_bot.get_command_names())
     async def send_message(message):
-        await message.answer(str(message))
         print(message)
 
         gp = group_media(fg_bot.get_command(message.get_command()))
@@ -54,7 +53,4 @@ def start(bot, proxy=None, token=None):
                 await message.answer_media_group(media=media)
 
 
-    print('executor')
     aiogram.executor.start_polling(dp, skip_updates=True)
-
-
