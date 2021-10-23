@@ -109,9 +109,9 @@ class Command:
         self.attachments = Attachment.parse_attachments(self.command_path)
 
 class Bot:
-    def __init__(self, root_path, proxy=None):
+    def __init__(self, root_path, proxy=None, token=None):
         self.root_path = os.path.abspath(root_path)
-        self.token = None
+        self.token = token
         self.proxy = proxy
         self.commands = []
 
@@ -124,20 +124,18 @@ class Bot:
         logging.debug(f"[class Bot] {self.proxy=}")
 
     def _get_token(self):
-        token = None
-        if os.path.isfile(os.path.join(self.root_path, TOKEN_FILE)):
+        if os.path.isfile(os.path.join(self.root_path, TOKEN_FILE)) and self.token is None:
             logging.debug(f"[class Bot._get_token] file exists")
             with open(os.path.join(self.root_path, TOKEN_FILE), encoding=ENCODING) as token_file:
-                token = token_file.read().strip()
-        return token
+                self.token = token_file.read().strip()
+        return self.token
 
     def _get_proxy(self):
-        proxy = None
-        if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)) and self.proxy is not None:
+        if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)) and self.proxy is None:
             logging.debug(f"[class Bot._get_proxy] file exists")
             with open(os.path.join(self.root_path, PROXY_FILE), encoding=ENCODING) as proxy_file:
-                proxy = proxy_file.read().strip()
-        return proxy
+                self.proxy = proxy_file.read().strip()
+        return self.proxy
 
     def _parse(self):
         # get token if file exists
