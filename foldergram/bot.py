@@ -7,14 +7,16 @@ def start(bot, proxy=None, token=None):
     ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
     dp = aiogram.Dispatcher(ai_bot)
 
-    print(fg_bot.get_command_names())
-    @dp.message_handler(commands=fg_bot.get_command_names())
+    print(fg_bot.get_aliases_names())
+    @dp.message_handler(lambda m: fg_bot.get_command_by_alias(m.text.lower().strip()) or fg_bot.get_command(m.get_command()))
     async def send_message(message):
         print(message)
 
-        gp = group_media(fg_bot.get_command(message.get_command()))
-        print(gp)
-
+        if message.is_command():
+            gp = group_media(fg_bot.get_command(message.get_command()))
+        else:
+            gp = group_media(fg_bot.get_command_by_alias(message.text))
+        
         for attch in gp:
             if not isinstance(attch, list):
                 if attch.type == 'text':

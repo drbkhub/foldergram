@@ -15,6 +15,7 @@ logging.basicConfig(
 
 
 COMMAND_DIR = 'commands'
+ALIAS_DIR = 'aliases'
 TOKEN_FILE = 'token.txt'
 PROXY_FILE = 'proxy.txt'
 ENCODING = 'utf-8'
@@ -84,6 +85,7 @@ class Command:
         self.full_name = '/' + self.name
         self.command_path = command_path
         self.attachments = []
+        self.aliases = []
 
         logging.debug(f"[class Command] {command_path=}")
 
@@ -104,9 +106,22 @@ class Command:
         logging.debug(f"[class Command] {folders=}")
         return [cls(os.path.join(root_path, COMMAND_DIR, folder)) for folder in folders]
 
+    def _parse_aliases(self):
+        # example_bot/commands/start
+        alias_file = os.path.split(self.command_path)[1] + '.txt'
+        alias_path = os.path.join(os.path.split(os.path.split(self.command_path)[0])[0], ALIAS_DIR)
+        path_to_alias = os.path.join(alias_path, alias_file)
+        print(path_to_alias)
+        if os.path.isfile(path_to_alias):
+            with open(path_to_alias, encoding=ENCODING) as f:
+                self.aliases.extend([line.lower() for line in f.read().splitlines() if line != ''])
+                logging.debug(f"[class Command] found aliases: {len(self.aliases)}")
+
     def _parse(self):
         # parse attachment 
         self.attachments = Attachment.parse_attachments(self.command_path)
+        # parse alias file
+        self._parse_aliases()
 
 class Bot:
     def __init__(self, root_path, proxy=None, token=None):
@@ -151,3 +166,14 @@ class Bot:
 
     def get_command_names(self):
         return [cmd.name for cmd in self.commands]
+
+    def get_aliases_names(self):
+        alises = []
+        for cmd in self.commands:
+            alises.extend(cmd.aliases)
+        return alises
+    
+    def get_command_by_alias(self, name):
+        for cmd in self.commands:
+            if name in cmd.aliases:
+                return cmd
