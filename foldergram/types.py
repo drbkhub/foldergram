@@ -16,6 +16,7 @@ logging.basicConfig(
 
 COMMAND_DIR = 'commands'
 ALIAS_DIR = 'aliases'
+KEYBOARD_DIR = 'keyboards'
 TOKEN_FILE = 'token.txt'
 PROXY_FILE = 'proxy.txt'
 ENCODING = 'utf-8'
@@ -86,6 +87,7 @@ class Command:
         self.command_path = command_path
         self.attachments = []
         self.aliases = []
+        self.keyboard = []
 
         logging.debug(f"[class Command] {command_path=}")
 
@@ -116,12 +118,23 @@ class Command:
             with open(path_to_alias, encoding=ENCODING) as f:
                 self.aliases.extend([line.lower() for line in f.read().splitlines() if line != ''])
                 logging.debug(f"[class Command] found aliases: {len(self.aliases)}")
+    
+    def _parse_keyboard(self):
+        keyboard_file = os.path.split(self.command_path)[1] + '.txt'
+        keyboard_path = os.path.join(os.path.split(os.path.split(self.command_path)[0])[0], KEYBOARD_DIR)
+        path_to_keyboard = os.path.join(keyboard_path, keyboard_file)
+        if os.path.isfile(path_to_keyboard):
+            with open(path_to_keyboard, encoding=ENCODING) as f:
+                self.keyboard.extend([line for line in f.read().splitlines() if line != ''])
+                logging.debug(f"[class Command] found keyboard buttons: {len(self.keyboard)}")
 
     def _parse(self):
         # parse attachment 
         self.attachments = Attachment.parse_attachments(self.command_path)
         # parse alias file
         self._parse_aliases()
+        # parse keyboars buttons
+        self._parse_keyboard()
 
 class Bot:
     def __init__(self, root_path, proxy=None, token=None):

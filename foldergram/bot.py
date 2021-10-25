@@ -1,4 +1,6 @@
 import aiogram
+from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
+
 from .types import Bot
 from .utils import group_media
 
@@ -13,16 +15,24 @@ def start(bot, proxy=None, token=None):
         print(message)
 
         if message.is_command():
-            gp = group_media(fg_bot.get_command(message.get_command()))
+            cmd = fg_bot.get_command(message.get_command())
+            gp = group_media(cmd)
         else:
-            gp = group_media(fg_bot.get_command_by_alias(message.text))
+            cmd = fg_bot.get_command_by_alias(message.text.lower().strip())
+            gp = group_media(cmd)
         
+        keyboard = None
+        if cmd.keyboard:
+            keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+            for button_text in cmd.keyboard:
+                keyboard.add(button_text)
+
         for attch in gp:
             if not isinstance(attch, list):
                 if attch.type == 'text':
                     with open(attch.file_path, encoding='utf-8') as f:
                         msg = f.read()
-                    await message.answer(msg)
+                    await message.answer(msg, reply_markup=keyboard)
                 elif attch.type == 'audio':
                     await message.answer_audio(
                         aiogram.types.InputFile(attch.file_path),
