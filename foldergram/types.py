@@ -89,7 +89,7 @@ class Command:
         self.command_path = command_path
         self.attachments = []
         self.aliases = []
-        self.keyboard = []
+        self.keyboard = None
 
         logging.debug(f"[class Command] {command_path=}")
 
@@ -127,7 +127,7 @@ class Command:
         path_to_keyboard = os.path.join(keyboard_path, keyboard_file)
         if os.path.isfile(path_to_keyboard):
             with open(path_to_keyboard, encoding=ENCODING) as f:
-                self.keyboard.extend([line for line in f.read().splitlines() if line != ''])
+                self.keyboard = [line for line in f.read().splitlines() if line != '']
                 logging.debug(f"[class Command] found keyboard buttons: {len(self.keyboard)}")
 
     def _parse(self):

@@ -26,6 +26,8 @@ def start(bot, proxy=None, token=None):
             keyboard = ReplyKeyboardMarkup(resize_keyboard=True,)# one_time_keyboard=True)
             for button_text in cmd.keyboard:
                 keyboard.add(button_text)
+        elif isinstance(cmd.keyboard, list):
+            keyboard = ReplyKeyboardRemove()
 
         for attch in gp:
             print(attch)
