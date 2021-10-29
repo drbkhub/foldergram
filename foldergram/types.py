@@ -28,7 +28,9 @@ class Attachment:
     def __init__(self, file_path):
         self.file_path = file_path
         self.description = ''
+        self.message = None
         self.type = None
+        self.cache_id = None
 
         self._parse()
 
@@ -43,9 +45,9 @@ class Attachment:
     @property
     def pretty_name(self):
         name = os.path.split(self.file_path)[1]
-        prefix = re.findall(r"^\d+[\._ ]\s*", self.file_path)
+        prefix = re.findall(r"^\d+[\._ ]\s*", name)
         if prefix:
-            return name[len(prefix[0])]
+            return name[len(prefix[0]):]
         return name
 
     def _parse(self):

@@ -12,7 +12,7 @@ def start(bot, proxy=None, token=None):
     print(fg_bot.get_aliases_names())
     @dp.message_handler(lambda m: fg_bot.get_command_by_alias(m.text.lower().strip()) or fg_bot.get_command(m.get_command()))
     async def send_message(message):
-        print(message)
+        # print(message)
 
         if message.is_command():
             cmd = fg_bot.get_command(message.get_command())
@@ -23,68 +23,99 @@ def start(bot, proxy=None, token=None):
         
         keyboard = None
         if cmd.keyboard:
-            keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(resize_keyboard=True,)# one_time_keyboard=True)
             for button_text in cmd.keyboard:
                 keyboard.add(button_text)
 
         for attch in gp:
+            print(attch)
             if not isinstance(attch, list):
                 if attch.type == 'text':
-                    with open(attch.file_path, encoding='utf-8') as f:
-                        msg = f.read()
-                    await message.answer(msg, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+                    if attch.message is None:
+                        with open(attch.file_path, encoding='utf-8') as f:
+                            msg = f.read()
+                        attch.message = msg
+                    await message.answer(attch.message or msg, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+
                 elif attch.type == 'audio':
-                    await message.answer_audio(
-                        aiogram.types.InputFile(attch.file_path),
+                    result = await message.answer_audio(
+                        attch.cache_id or aiogram.types.InputFile(attch.file_path),
                         caption=attch.description,
                         title=attch.pretty_name, 
                         parse_mode=ParseMode.HTML,
+                        reply_markup=keyboard,
                         )
+                    attch.cache_id = result.audio.file_id
+
                 elif attch.type == 'video':
-                    await message.answer_video(
-                        aiogram.types.InputFile(attch.file_path), 
+                    result = await message.answer_video(
+                        attch.cache_id or aiogram.types.InputFile(attch.file_path), 
                         caption=attch.description, 
                         parse_mode=ParseMode.HTML,
+                        reply_markup=keyboard,
                         )
+                    attch.cache_id = result.video.file_id
+
                 elif attch.type == 'image':
-                    await message.answer_photo(
-                        aiogram.types.InputFile(attch.file_path), 
+                    result = await message.answer_photo(
+                        attch.cache_id or aiogram.types.InputFile(attch.file_path), 
                         caption=attch.description, 
                         parse_mode=ParseMode.HTML,
+                        reply_markup=keyboard,
                         )
+                    # записываю id фото в кеш вложения
+                    attch.cache_id = result.photo[-1].file_id
+
                 elif attch.type == None:
-                    await message.answer_document(
-                        aiogram.types.InputFile(attch.file_path), 
+                    result = await message.answer_document(
+                        attch.cache_id or aiogram.types.InputFile(attch.file_path), 
                         caption=attch.description, 
                         parse_mode=ParseMode.HTML,
+                        reply_markup=keyboard,
                         )
+                    attch.cache_id = result.document.file_id
 
             elif isinstance(attch, list):
                 media = aiogram.types.MediaGroup()
                 for item in attch:
+                    print(item.cache_id)
                     if item.type == 'image':
                         media.attach_photo(
-                            aiogram.types.InputFile(item.file_path), 
+                            item.cache_id or aiogram.types.InputFile(item.file_path), 
                             caption=item.description
                             )
                     elif item.type == 'audio':
                         media.attach_audio(
-                            aiogram.types.InputFile(
-                                item.file_path),
-                                caption=item.description,
-                                title=item.pretty_name
-                                )
+                            item.cache_id or aiogram.types.InputFile(
+                            item.file_path),
+                            caption=item.description,
+                            title=item.pretty_name
+                            )
                     elif item.type == 'video':
                         media.attach_video(
-                            aiogram.types.InputFile(item.file_path), 
+                            item.cache_id or aiogram.types.InputFile(item.file_path), 
                             caption=item.description
                             )
                     elif item.type == None:
                         media.attach_document(
-                            aiogram.types.InputFile(item.file_path), 
+                            item.cache_id or aiogram.types.InputFile(item.file_path), 
                             caption=item.description
                             )
-                await message.answer_media_group(media=media)
+                result = await message.answer_media_group(media=media)
+
+                # обновление кеша вложений
+                print(result)
+                for i, item in enumerate(attch):
+                    if item.type == 'image':
+                        attch[i].cache_id = result[i].photo[-1].file_id
+                    elif item.type == 'audio':
+                        attch[i].cache_id = result[i].audio.file_id
+                    elif item.type == 'video':
+                        attch[i].cache_id = result[i].video.file_id
+                    elif item.type == None:
+                        attch[i].cache_id = result[i].document.file_id
+            keyboard=None
+            
 
 
     aiogram.executor.start_polling(dp, skip_updates=True)
