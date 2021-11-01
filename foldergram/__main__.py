@@ -7,6 +7,4 @@ parser.add_argument('--proxy', '-p')
 parser.add_argument('--token', '-t')
 args = parser.parse_args()
 
-print(args)
-
 bot.start(args.bot, args.proxy, args.token)

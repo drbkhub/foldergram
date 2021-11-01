@@ -13,7 +13,7 @@ logging.basicConfig(
     level=logging.DEBUG
 )
 
-
+SETTING_DIR = 'setting'
 COMMAND_DIR = 'commands'
 ALIAS_DIR = 'aliases'
 KEYBOARD_DIR = 'keyboards'
@@ -111,22 +111,16 @@ class Command:
         return [cls(os.path.join(root_path, COMMAND_DIR, folder)) for folder in folders]
 
     def _parse_aliases(self):
-        # example_bot/commands/start
-        alias_file = os.path.split(self.command_path)[1] + '.txt'
-        alias_path = os.path.join(os.path.split(os.path.split(self.command_path)[0])[0], ALIAS_DIR)
-        path_to_alias = os.path.join(alias_path, alias_file)
-        print(path_to_alias)
-        if os.path.isfile(path_to_alias):
-            with open(path_to_alias, encoding=ENCODING) as f:
+        alias_file = os.path.join(self.command_path, SETTING_DIR, 'alias.txt')
+        if os.path.isfile(alias_file):
+            with open(alias_file, encoding=ENCODING) as f:
                 self.aliases.extend([line.lower() for line in f.read().splitlines() if line != ''])
                 logging.debug(f"[class Command] found aliases: {len(self.aliases)}")
     
     def _parse_keyboard(self):
-        keyboard_file = os.path.split(self.command_path)[1] + '.txt'
-        keyboard_path = os.path.join(os.path.split(os.path.split(self.command_path)[0])[0], KEYBOARD_DIR)
-        path_to_keyboard = os.path.join(keyboard_path, keyboard_file)
-        if os.path.isfile(path_to_keyboard):
-            with open(path_to_keyboard, encoding=ENCODING) as f:
+        keyboard_file = os.path.join(self.command_path, SETTING_DIR, 'keyboard.txt')
+        if os.path.isfile(keyboard_file):
+            with open(keyboard_file, encoding=ENCODING) as f:
                 self.keyboard = [line for line in f.read().splitlines() if line != '']
                 logging.debug(f"[class Command] found keyboard buttons: {len(self.keyboard)}")
 

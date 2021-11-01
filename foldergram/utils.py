@@ -14,7 +14,6 @@ def sort_like_explorer(dir_path: str) -> tuple[list[str], list[str]]:
         elif os.path.isdir(os.path.join(dir_path, item)):
             dirs.append(item)
 
-    print(files)
     return dirs, files
 
 def group_media(command) -> list:

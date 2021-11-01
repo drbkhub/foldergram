@@ -9,10 +9,8 @@ def start(bot, proxy=None, token=None):
     ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
     dp = aiogram.Dispatcher(ai_bot)
 
-    print(fg_bot.get_aliases_names())
     @dp.message_handler(lambda m: fg_bot.get_command_by_alias(m.text.lower().strip()) or fg_bot.get_command(m.get_command()))
     async def send_message(message):
-        # print(message)
 
         if message.is_command():
             cmd = fg_bot.get_command(message.get_command())
@@ -30,7 +28,6 @@ def start(bot, proxy=None, token=None):
             keyboard = ReplyKeyboardRemove()
 
         for attch in gp:
-            print(attch)
             if not isinstance(attch, list):
                 if attch.type == 'text':
                     if attch.message is None:
@@ -80,7 +77,6 @@ def start(bot, proxy=None, token=None):
             elif isinstance(attch, list):
                 media = aiogram.types.MediaGroup()
                 for item in attch:
-                    print(item.cache_id)
                     if item.type == 'image':
                         media.attach_photo(
                             item.cache_id or aiogram.types.InputFile(item.file_path), 
@@ -106,7 +102,6 @@ def start(bot, proxy=None, token=None):
                 result = await message.answer_media_group(media=media)
 
                 # обновление кеша вложений
-                print(result)
                 for i, item in enumerate(attch):
                     if item.type == 'image':
                         attch[i].cache_id = result[i].photo[-1].file_id
