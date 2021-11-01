@@ -15,10 +15,9 @@ logging.basicConfig(
 
 SETTING_DIR = 'setting'
 COMMAND_DIR = 'commands'
-ALIAS_DIR = 'aliases'
-KEYBOARD_DIR = 'keyboards'
 TOKEN_FILE = 'token.txt'
 PROXY_FILE = 'proxy.txt'
+ADMIN_FILE = 'admin.txt'
 ENCODING = 'utf-8'
 
 
@@ -137,6 +136,7 @@ class Bot:
         self.root_path = os.path.abspath(root_path)
         self.token = token
         self.proxy = proxy
+        self.admins = []
         self.commands = []
 
         logging.debug(f"[class Bot] {self.root_path=}")
@@ -152,20 +152,26 @@ class Bot:
             logging.debug(f"[class Bot._get_token] file exists")
             with open(os.path.join(self.root_path, TOKEN_FILE), encoding=ENCODING) as token_file:
                 self.token = token_file.read().strip()
-        return self.token
 
     def _get_proxy(self):
         if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)) and self.proxy is None:
             logging.debug(f"[class Bot._get_proxy] file exists")
             with open(os.path.join(self.root_path, PROXY_FILE), encoding=ENCODING) as proxy_file:
                 self.proxy = proxy_file.read().strip()
-        return self.proxy
+
+    def _get_admin(self):
+        if os.path.isfile(os.path.join(self.root_path, ADMIN_FILE)) and not self.admins:
+            logging.debug(f"[class Bot._get_admin] file exists")
+            with open(os.path.join(self.root_path, ADMIN_FILE), encoding=ENCODING) as admin_file:
+                self.admins = [admin.strip() for admin in admin_file.read().splitlines() if admin != '']
 
     def _parse(self):
         # get token if file exists
-        self.token = self._get_token()
+        self._get_token()
         # get proxy if file exists
-        self.proxy = self._get_proxy()
+        self._get_proxy()
+        # get admin if file exists
+        self._get_admin()
         # parse commdands
         self.commands = Command.parse_commands(self.root_path)
 
