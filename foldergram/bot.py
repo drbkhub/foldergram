@@ -1,13 +1,19 @@
-import aiogram
+import aiogram, asyncio
+from aiogram.dispatcher.storage import FSMContext
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, ParseMode
+from aiogram.types.message import Message
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
 
 from .types import Bot
 from .utils import group_media
 
+
 def start(bot, proxy=None, token=None):
     fg_bot = Bot(bot, proxy=proxy, token=token)
     ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
-    dp = aiogram.Dispatcher(ai_bot)
+    dp = aiogram.Dispatcher(ai_bot, storage=MemoryStorage())
+
 
     @dp.message_handler(lambda m: fg_bot.get_command_by_alias(m.text.lower().strip()) or fg_bot.get_command(m.get_command()))
     async def send_message(message):
@@ -35,6 +41,13 @@ def start(bot, proxy=None, token=None):
                             msg = f.read()
                         attch.message = msg
                     await message.answer(attch.message or msg, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+
+                elif attch.type == 'location':
+                    if all(attch.location):
+                        result = await message.answer_location(attch.location[0], attch.location[1], reply_markup=keyboard)
+
+                elif attch.type == 'number':
+                    result = await message.answer_contact(attch.number[0], attch.number[1], attch.number[2], reply_markup=keyboard)
 
                 elif attch.type == 'audio':
                     result = await message.answer_audio(
@@ -112,7 +125,7 @@ def start(bot, proxy=None, token=None):
                     elif item.type == None:
                         attch[i].cache_id = result[i].document.file_id
             keyboard=None
+        # await asyncio.sleep(1)
+        # await message.delete()
             
-
-
     aiogram.executor.start_polling(dp, skip_updates=True)

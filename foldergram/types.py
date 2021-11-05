@@ -22,7 +22,7 @@ ENCODING = 'utf-8'
 
 
 class Attachment:
-    types = ('image', 'audio', 'video', 'text')
+    types = ('image', 'audio', 'video', 'text', 'number', 'location')
 
     def __init__(self, file_path):
         self.file_path = file_path
@@ -30,6 +30,8 @@ class Attachment:
         self.message = None
         self.type = None
         self.cache_id = None
+        self.location = [None, None]
+        self.number = [None, None, None] # phone, first name, last name 
 
         self._parse()
 
@@ -61,6 +63,21 @@ class Attachment:
         if mime_type:
             if mime_type.split('/')[0] in self.types:
                 self.type = mime_type.split('/')[0]
+        
+        if os.path.splitext(self.file_path)[1].lower() == '.loc':
+            self.type = 'location' # place location
+            with open(self.file_path, encoding=ENCODING) as f:
+                self.location = list(map(float, f.read().splitlines()[:2]))
+
+        elif os.path.splitext(self.file_path)[1].lower() == '.num':
+            self.type = 'number' # phone number
+            with open(self.file_path, encoding=ENCODING) as f:
+                data = f.read().splitlines()[:3]
+                last_name = None
+                phone, first_name = data[0], data[1]
+                if len(data) == 3:
+                    last_name = data[2]
+                self.number = [phone, first_name, last_name]
     
     @classmethod
     def parse_attachments(cls, command_path):
@@ -163,7 +180,7 @@ class Bot:
         if os.path.isfile(os.path.join(self.root_path, ADMIN_FILE)) and not self.admins:
             logging.debug(f"[class Bot._get_admin] file exists")
             with open(os.path.join(self.root_path, ADMIN_FILE), encoding=ENCODING) as admin_file:
-                self.admins = [admin.strip() for admin in admin_file.read().splitlines() if admin != '']
+                self.admins = [int(admin.strip()) for admin in admin_file.read().splitlines() if admin != '']
 
     def _parse(self):
         # get token if file exists
