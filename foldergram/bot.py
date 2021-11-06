@@ -35,12 +35,8 @@ def start(bot, proxy=None, token=None):
 
         for attch in gp:
             if not isinstance(attch, list):
-                if attch.type == 'text':
-                    if attch.message is None:
-                        with open(attch.file_path, encoding='utf-8') as f:
-                            msg = f.read()
-                        attch.message = msg
-                    await message.answer(attch.message or msg, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+                if attch.type == 'message':
+                    await message.answer(attch.message, reply_markup=keyboard, parse_mode=ParseMode.HTML)
 
                 elif attch.type == 'location':
                     if all(attch.location):
@@ -125,7 +121,7 @@ def start(bot, proxy=None, token=None):
                     elif item.type == None:
                         attch[i].cache_id = result[i].document.file_id
             keyboard=None
-        # await asyncio.sleep(1)
+            await asyncio.sleep(.25)
         # await message.delete()
             
     aiogram.executor.start_polling(dp, skip_updates=True)

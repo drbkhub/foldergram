@@ -22,7 +22,15 @@ ENCODING = 'utf-8'
 
 
 class Attachment:
-    types = ('image', 'audio', 'video', 'text', 'number', 'location')
+    types = ('image', 'audio', 'video', 'message', 'number', 'location')
+    extensions = {
+        'image': ('.bmp', '.gif', '.jpeg', '.jpg', '.png'),
+        'audio': ('.aac', '.mp3', '.ogg', '.wav'),
+        'video': ('.avi', '.mkv', '.mp4', '.webm'),
+        'message': ('.txt'),
+        'number': ('.num'),
+        'location': ('.loc'),
+    }
 
     def __init__(self, file_path):
         self.file_path = file_path
@@ -57,27 +65,44 @@ class Attachment:
         if os.path.isfile(desc_file) and desc_file != self.file_path:
             with open(desc_file, encoding=ENCODING) as f:
                 self.description = f.read()
-
-        # guess type file
-        mime_type = mimetypes.guess_type(self.file_path)[0]
-        if mime_type:
-            if mime_type.split('/')[0] in self.types:
-                self.type = mime_type.split('/')[0]
         
-        if os.path.splitext(self.file_path)[1].lower() == '.loc':
-            self.type = 'location' # place location
-            with open(self.file_path, encoding=ENCODING) as f:
-                self.location = list(map(float, f.read().splitlines()[:2]))
+        current_ext = os.path.splitext(self.file_path)[1].lower()
+        for _type, exts in self.extensions.items():
+        
+            # Известные файлы, которые можно отправить НЕ как документ
+            if current_ext in exts:
+                # сообщение, по-умолчанию текстовый документ - сообщение телеграма
+                if _type == 'message':
+                    self.type = _type
+                    with open(self.file_path, encoding=ENCODING) as f:
+                        self.message = f.read()
+                # местоположение
+                elif _type == 'location':
+                    self.type = _type # place location
+                    with open(self.file_path, encoding=ENCODING) as f:
+                        self.location = list(map(float, f.read().splitlines()[:2]))
+                # визитка
+                elif _type == 'number':
+                    self.type = _type # phone number
+                    with open(self.file_path, encoding=ENCODING) as f:
+                        data = f.read().splitlines()[:3]
+                        last_name = None
+                        phone, first_name = data[0], data[1]
+                        if len(data) == 3:
+                            last_name = data[2]
+                        self.number = [phone, first_name, last_name]
+                
+                elif _type == 'video':
+                    self.type = _type
 
-        elif os.path.splitext(self.file_path)[1].lower() == '.num':
-            self.type = 'number' # phone number
-            with open(self.file_path, encoding=ENCODING) as f:
-                data = f.read().splitlines()[:3]
-                last_name = None
-                phone, first_name = data[0], data[1]
-                if len(data) == 3:
-                    last_name = data[2]
-                self.number = [phone, first_name, last_name]
+                elif _type == 'audio':
+                    self.type = _type
+
+                elif _type == 'image':
+                    self.type = _type
+            # поумолчанию все неизвестные файлы - документы, self.type = None
+            # else:
+            #     pass
     
     @classmethod
     def parse_attachments(cls, command_path):
