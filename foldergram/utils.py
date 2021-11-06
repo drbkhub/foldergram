@@ -19,7 +19,7 @@ def sort_like_explorer(dir_path: str) -> tuple[list[str], list[str]]:
 def group_media(command) -> list:
     group = []
     for index, item in enumerate(command.attachments):
-        if item.type == 'text' or item.type == 'location' or item.type == 'number':
+        if item.type == 'text' or item.type == 'location' or item.type == 'text' or item.type == 'number':
             group.append(item)
         
         elif not group:
