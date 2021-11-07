@@ -6,7 +6,6 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 
 from .types import Bot
-from .utils import group_media
 
 
 def start(bot, proxy=None, token=None):

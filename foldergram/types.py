@@ -2,7 +2,6 @@ import os
 import re
 import mimetypes
 from typing import Union
-from .utils import sort_like_explorer
 
 import logging
 
