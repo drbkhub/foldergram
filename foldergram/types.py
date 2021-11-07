@@ -1,6 +1,7 @@
 import os
 import re
 import mimetypes
+from typing import Union
 from .utils import sort_like_explorer
 
 import logging
@@ -234,3 +235,27 @@ class Bot:
         for cmd in self.commands:
             if name in cmd.aliases:
                 return cmd
+
+    def get_group_media(self, command: Union[Command, str]):
+        group = []
+        if not isinstance(command, Command):
+            command = self.get_command_by_alias(command)
+
+        if command:
+            for index, item in enumerate(command.attachments):
+                if item.type == 'text' or item.type == 'location' or item.type == 'text' or item.type == 'number':
+                    group.append(item)
+                
+                elif not group:
+                    group.append(item)
+
+                elif not isinstance(group[-1], list) and group[-1].type == item.type:
+                    group[-1] = [group[-1], item]
+                
+                elif isinstance(group[-1], list) and len(group[-1]) < 10 and group[-1][0].type == item.type:
+                    group[-1].append(item)
+
+                else:
+                    group.append(item)
+
+        return group  

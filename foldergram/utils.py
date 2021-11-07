@@ -15,23 +15,4 @@ def sort_like_explorer(dir_path: str) -> tuple[list[str], list[str]]:
             dirs.append(item)
 
     return dirs, files
-
-def group_media(command) -> list:
-    group = []
-    for index, item in enumerate(command.attachments):
-        if item.type == 'text' or item.type == 'location' or item.type == 'text' or item.type == 'number':
-            group.append(item)
-        
-        elif not group:
-            group.append(item)
-
-        elif not isinstance(group[-1], list) and group[-1].type == item.type:
-            group[-1] = [group[-1], item]
-        
-        elif isinstance(group[-1], list) and len(group[-1]) < 10 and group[-1][0].type == item.type:
-            group[-1].append(item)
-
-        else:
-            group.append(item)
-
-    return group         
+    

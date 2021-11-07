@@ -20,10 +20,11 @@ def start(bot, proxy=None, token=None):
 
         if message.is_command():
             cmd = fg_bot.get_command(message.get_command())
-            gp = group_media(cmd)
+            gp = fg_bot.get_group_media(cmd)
         else:
             cmd = fg_bot.get_command_by_alias(message.text.lower().strip())
-            gp = group_media(cmd)
+            gp = fg_bot.get_group_media(cmd)
+
         
         keyboard = None
         if cmd.keyboard:
