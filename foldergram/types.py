@@ -22,10 +22,9 @@ ENCODING = 'utf-8'
 
 
 class Attachment:
-    types = ('image', 'audio', 'video', 'message', 'number', 'location', 'voice')
     extensions = {
         'image': ('.bmp', '.gif', '.jpeg', '.jpg', '.png'),
-        'audio': ('.aac', '.mp3', '.ogg', '.wav'),
+        'audio': ('.aac', '.mp3', '.wav'),
         'video': ('.avi', '.mkv', '.mp4', '.webm'),
         'message': ('.txt'),
         'number': ('.num'),
