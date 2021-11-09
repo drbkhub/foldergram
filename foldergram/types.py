@@ -22,7 +22,7 @@ ENCODING = 'utf-8'
 
 
 class Attachment:
-    types = ('image', 'audio', 'video', 'message', 'number', 'location')
+    types = ('image', 'audio', 'video', 'message', 'number', 'location', 'voice')
     extensions = {
         'image': ('.bmp', '.gif', '.jpeg', '.jpg', '.png'),
         'audio': ('.aac', '.mp3', '.ogg', '.wav'),
@@ -30,6 +30,8 @@ class Attachment:
         'message': ('.txt'),
         'number': ('.num'),
         'location': ('.loc'),
+        'voice': ('.ogg'),
+        'quiz': ('.quiz'),
     }
 
     def __init__(self, file_path):
@@ -39,7 +41,11 @@ class Attachment:
         self.type = None
         self.cache_id = None
         self.location = [None, None]
-        self.number = [None, None, None] # phone, first name, last name 
+        self.number = [None, None, None] # phone, first name, last name
+        # quiz
+        self.question = None
+        self.options = []
+        self.answer_indexes = [] 
 
         self._parse()
 
@@ -86,11 +92,27 @@ class Attachment:
                     self.type = _type # phone number
                     with open(self.file_path, encoding=ENCODING) as f:
                         data = f.read().splitlines()[:3]
-                        last_name = None
-                        phone, first_name = data[0], data[1]
-                        if len(data) == 3:
-                            last_name = data[2]
-                        self.number = [phone, first_name, last_name]
+                    last_name = None
+                    phone, first_name = data[0], data[1]
+                    if len(data) == 3:
+                        last_name = data[2]
+                    self.number = [phone, first_name, last_name]
+
+                elif _type == 'quiz':
+                    self.type = _type
+                    with open(self.file_path, encoding=ENCODING) as f:
+                        data = [line for line in f.read().splitlines() if line != '']
+                    self.options = []
+                    self.answer_indexes = []
+                    self.question = data[0]
+                    data = data[1:]
+                    for i, item in enumerate(data):
+                        item.strip()
+                        if item[0] == '*':
+                            self.answer_indexes.append(i)
+                            item = item[1:].strip()
+                        self.options.append(item)
+
                 
                 elif _type == 'video':
                     self.type = _type
@@ -100,6 +122,10 @@ class Attachment:
 
                 elif _type == 'image':
                     self.type = _type
+
+                elif _type == 'voice':
+                    self.type = _type
+
             # поумолчанию все неизвестные файлы - документы, self.type = None
             # else:
             #     pass
@@ -242,7 +268,8 @@ class Bot:
 
         if command:
             for index, item in enumerate(command.attachments):
-                if item.type == 'text' or item.type == 'location' or item.type == 'text' or item.type == 'number':
+                # не группируются следующие типы
+                if item.type in ('text', 'location', 'text', 'number', 'voice', 'quiz'):
                     group.append(item)
                 
                 elif not group:

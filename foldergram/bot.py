@@ -74,6 +74,24 @@ def start(bot, proxy=None, token=None):
                     # записываю id фото в кеш вложения
                     attch.cache_id = result.photo[-1].file_id
 
+                elif attch.type == 'voice':
+                    result = await message.answer_voice(
+                        attch.cache_id or aiogram.types.InputFile(attch.file_path), 
+                        caption=attch.description, 
+                        reply_markup=keyboard,
+                        )
+                    attch.cache_id = result.voice.file_id
+
+                elif attch.type == 'quiz':
+                    result = await message.answer_poll(
+                        attch.question,
+                        attch.options,
+                        type='quiz',
+                        correct_option_id = attch.answer_indexes[0],
+                        explanation=attch.description, 
+                        reply_markup=keyboard,
+                        )
+
                 elif attch.type == None:
                     result = await message.answer_document(
                         attch.cache_id or aiogram.types.InputFile(attch.file_path), 
