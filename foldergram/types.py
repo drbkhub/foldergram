@@ -149,9 +149,15 @@ class Attachment:
 
 
 class Command:
-    def __init__(self, command_path):
-        self.name = os.path.split(command_path)[1]
-        self.full_name = '/' + self.name
+    def __init__(self, command_path, name=None):
+        
+        if name is None:
+            self.name = os.path.split(command_path)[1]
+            self.full_name = '/' + self.name
+        else:
+            self.name = name
+            self.full_name = '/' + self.name
+
         self.command_path = command_path
         self.attachments = []
         self.aliases = []
@@ -172,9 +178,19 @@ class Command:
     @classmethod
     def parse_commands(cls, root_path):
         # folders are contain "commands"
-        folders, _ = sort_like_explorer(os.path.join(root_path, COMMAND_DIR))
+        root_command = os.path.join(root_path, COMMAND_DIR)
+        commands = []
+        folders, _ = sort_like_explorer(root_command)
         logging.debug(f"[class Command] {folders=}")
-        return [cls(os.path.join(root_path, COMMAND_DIR, folder)) for folder in folders]
+        sublen = len(root_command) + 1
+        for path, folders, files in os.walk(root_command):
+            root = path[sublen:]
+            if os.path.split(path)[1].lower() != SETTING_DIR:
+                print(path, '_'.join(root.split(os.path.sep)))
+                commands.append(cls(path, name='_'.join(root.split(os.path.sep))))
+
+        return commands
+        # return [cls(os.path.join(root_path, COMMAND_DIR, folder)) for folder in folders]
 
     def _parse_aliases(self):
         alias_file = os.path.join(self.command_path, SETTING_DIR, 'alias.txt')
