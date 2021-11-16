@@ -186,7 +186,7 @@ class Command:
         for path, folders, files in os.walk(root_command):
             root = path[sublen:]
             if os.path.split(path)[1].lower() != SETTING_DIR:
-                print(path, '_'.join(root.split(os.path.sep)))
+                # print(path, '_'.join(root.split(os.path.sep)))
                 commands.append(cls(path, name='_'.join(root.split(os.path.sep))))
 
         return commands
@@ -203,7 +203,9 @@ class Command:
         keyboard_file = os.path.join(self.command_path, SETTING_DIR, 'keyboard.txt')
         if os.path.isfile(keyboard_file):
             with open(keyboard_file, encoding=ENCODING) as f:
-                self.keyboard = [line for line in f.read().splitlines() if line != '']
+                # self.keyboard = [line for line in f.read().splitlines() if line != '']
+                self.keyboard = [[row.strip() for row in line.split("|") if row.strip() != ''] for line in f.read().splitlines() if line != '']
+                print("keyboard", self.keyboard)
                 logging.debug(f"[class Command] found keyboard buttons: {len(self.keyboard)}")
 
     def _parse(self):
