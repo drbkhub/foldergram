@@ -3,6 +3,7 @@ import aiogram, asyncio
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.storage import FSMContext
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton, ParseMode, ContentType, MediaGroup
+from aiogram.types.bot_command import BotCommand
 from aiogram.types.message import Message
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.middlewares import BaseMiddleware
@@ -137,40 +138,57 @@ async def collect_message(cmd, message, gp):
         await asyncio.sleep(.25)
     # await message.delete()
 
+async def startup(dp):
+    for admin_id in setting.bot.admins:
+        await dp.bot.set_my_commands(
+            [
+                BotCommand('start', 'запустить бот'),
+                BotCommand('stat', 'статистика'),
+                BotCommand('newpost', 'рассылка'),
+                ],
+            aiogram.types.bot_command_scope.BotCommandScopeChat(admin_id)
+        )
+
+    await dp.bot.delete_my_commands()
+    
 def start():
     if setting.bot:
         fg_bot = setting.bot
         ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
         dp = aiogram.Dispatcher(ai_bot, storage=MemoryStorage())
         dp.middleware.setup(AlbumMiddleware())
+        
     else:
-        raise Exception("Is not defined bot")
+        raise Exception()
+
+    # ai_bot.set_my_commands(BotCommand('start', 'старк'))
 
     @dp.message_handler(filters.isAdmin, commands='stat')
     async def get_statictics(message):
         users = database.select_users()
         count_user = len(users)
-        print(users)
+        print(message)
         last7day = 0
         lastday = 0
+        hour = 0
         online = 0
         for item in users:
             if datetime.now() - datetime.fromisoformat(item['last_activity']) < timedelta(weeks=1):
-                print(datetime.now() - datetime.fromisoformat(item['last_activity']))
                 last7day += 1
                 if datetime.now() - datetime.fromisoformat(item['last_activity']) < timedelta(hours=24):
-                    print(datetime.now() - datetime.fromisoformat(item['last_activity']))
                     lastday += 1
-                    if datetime.now() - datetime.fromisoformat(item['last_activity']) < timedelta(minutes=1):
-                        print(datetime.now() - datetime.fromisoformat(item['last_activity']))
-                        online += 1
+                    if datetime.now() - datetime.fromisoformat(item['last_activity']) < timedelta(hours=1):
+                        hour += 1
+                        if datetime.now() - datetime.fromisoformat(item['last_activity']) < timedelta(minutes=1):
+                            online += 1
                     
 
-        stat = f"<b>СТАТИСТИКА</b>" \
-            f"\n\nОнлайн: {online}" \
-            f"\n\nАктивность:\n 24 часа: {lastday}" \
-            f"\n 7 дней: {last7day}" \
-            f"\n\nВсего пользователей: {count_user}" \
+        stat = f"<b><i>СТАТИСТИКА</i></b>" \
+            f"\n\n<i>Активность:</i>\n - последний час: <b>{hour}</b>" \
+            f"\n - 24 часа: <b>{lastday}</b>" \
+            f"\n - 7 дней: <b>{last7day}</b>" \
+            f"\n\n<b>Онлайн</b>: <b>{online}</b>" \
+            f"\nВсего пользователей: <b>{count_user}</b>" \
 
         
         await message.answer(stat, parse_mode=ParseMode.HTML)
@@ -182,7 +200,7 @@ def start():
         if await state.get_state() != 'newpost':
             markup = keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
             markup.add("Отмена")
-            await ai_bot.send_message(message.from_user.id, text="Напишите сообщение которое будет разосланно всем", reply_markup=markup)
+            await ai_bot.send_message(message.from_user.id, text="Напечатайте ваше сообщение", reply_markup=markup)
             await state.set_state('newpost')
             print(await state.get_state())
     
@@ -256,7 +274,8 @@ def start():
         await collect_message(cmd, message, gp)
         database.update_activity(message.from_user.id)
     
-    aiogram.executor.start_polling(dp, skip_updates=True)
+    aiogram.executor.start_polling(dp, skip_updates=True, on_startup=startup)
+    
 
 
 
