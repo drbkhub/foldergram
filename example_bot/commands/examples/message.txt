@@ -1,0 +1,35 @@
+<b>ПРИМЕРЫ СООБЩЕНИЙ</b>
+
+Примеры с клавиатурой
+/examples_keyboard
+
+Примеры сообщений с изображениями
+/examples_image
+/examples_image_with_caption
+/examples_image_album
+/examples_image_album_with_caption
+
+Примеры сообщений с видео
+/examples_video
+/examples_video_with_caption
+/examples_video_album
+/examples_video_album_with_caption
+
+Примеры сообщений с аудио
+/examples_audio
+/examples_audio_with_caption
+/examples_audio_album
+/examples_audio_album_with_caption
+
+Примеры голосовых сообщений
+/examples_voice
+/examples_voice_with_caption
+
+Пример местоположения на карте
+/examples_location
+
+Пример сообщения-контакта
+/examples_phone_number
+
+Пример викторины
+/examples_quiz

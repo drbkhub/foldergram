@@ -1,0 +1,5 @@
+<b>а также изображения:</b>
+
+/examples_image_with_caption - <b>c подписью</b>
+/examples_image_album - <b>альбом</b> 
+/examples_image_album_with_caption - <b>альбом с подписью</b>

@@ -1,0 +1,8 @@
+<b>а также видео:</b>
+
+<b>c подписью</b>
+/examples_video_with_caption
+<b>альбом</b>
+/examples_video_album
+<b>альбом с подписью</b>
+/examples_video_album_with_caption

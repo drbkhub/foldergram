@@ -1,0 +1,8 @@
+<b>а также аудио:</b>
+
+<b>c подписью</b>
+/examples_audio_with_caption
+<b>альбом</b>
+/examples_audio_album 
+<b>альбом с подписью</b>
+/examples_audio_album_with_caption
