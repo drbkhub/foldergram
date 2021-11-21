@@ -12,6 +12,5 @@ args = parser.parse_args()
 setting.args = args
 print(f"Запускаю бота")
 setting.bot = types.Bot(args.bot, proxy=args.proxy, token=args.token)
-print(f"Количество комманд: {len(setting.bot.commands)}")
 
 bot.start()

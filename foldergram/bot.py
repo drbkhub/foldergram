@@ -152,17 +152,18 @@ async def startup(dp):
     await dp.bot.delete_my_commands()
     
 def start(path=None):
+    # # если запускаемся с exe
     if path:
-        setting.bot = path
+        print(f'path {path=}')
+        setting.bot = fg_bot = Bot(path)
 
-    if setting.bot:
-        fg_bot = setting.bot
-        ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
-        dp = aiogram.Dispatcher(ai_bot, storage=MemoryStorage())
-        dp.middleware.setup(AlbumMiddleware())
+    elif path is None:
+        fg_bot = Bot(setting.args.bot, proxy=setting.args.proxy, token=setting.args.token)
+    
+    ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
+    dp = aiogram.Dispatcher(ai_bot, storage=MemoryStorage())
+    dp.middleware.setup(AlbumMiddleware())
 
-    else:
-        raise Exception()
 
     # ai_bot.set_my_commands(BotCommand('start', 'старк'))
 
