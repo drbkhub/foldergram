@@ -1,5 +1,7 @@
 /venv
 /.idea
 /foldergram/__pycache__/
-main.py
+__pycache__/
+database.db
 log.txt
+token.txt
