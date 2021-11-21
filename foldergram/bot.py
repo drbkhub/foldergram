@@ -151,13 +151,16 @@ async def startup(dp):
 
     await dp.bot.delete_my_commands()
     
-def start():
+def start(path=None):
+    if path:
+        setting.bot = path
+
     if setting.bot:
         fg_bot = setting.bot
         ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
         dp = aiogram.Dispatcher(ai_bot, storage=MemoryStorage())
         dp.middleware.setup(AlbumMiddleware())
-        
+
     else:
         raise Exception()
 
