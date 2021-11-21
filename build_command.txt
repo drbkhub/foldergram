@@ -1,1 +1,1 @@
-pyinstaller --onefile --icon tg.ico --noconsole main.py
+pyinstaller --onefile --icon tg.ico --noconsole main.py -n foldergram.exe --distpath example_bot
