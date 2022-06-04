@@ -15,8 +15,6 @@ from . import database
 from . import setting
 from . import filters
 
-print(setting.bot)
-
 
 async def collect_message(cmd, message, gp):
     keyboard = None
@@ -45,7 +43,7 @@ async def collect_message(cmd, message, gp):
                 result = await message.answer_audio(
                     attch.cache_id or aiogram.types.InputFile(attch.file_path),
                     caption=attch.description,
-                    title=attch.pretty_name, 
+                    title=attch.pretty_name,
                     parse_mode=ParseMode.HTML,
                     reply_markup=keyboard,
                     )
@@ -53,8 +51,8 @@ async def collect_message(cmd, message, gp):
 
             elif attch.type == 'video':
                 result = await message.answer_video(
-                    attch.cache_id or aiogram.types.InputFile(attch.file_path), 
-                    caption=attch.description, 
+                    attch.cache_id or aiogram.types.InputFile(attch.file_path),
+                    caption=attch.description,
                     parse_mode=ParseMode.HTML,
                     reply_markup=keyboard,
                     )
@@ -62,8 +60,8 @@ async def collect_message(cmd, message, gp):
 
             elif attch.type == 'image':
                 result = await message.answer_photo(
-                    attch.cache_id or aiogram.types.InputFile(attch.file_path), 
-                    caption=attch.description, 
+                    attch.cache_id or aiogram.types.InputFile(attch.file_path),
+                    caption=attch.description,
                     parse_mode=ParseMode.HTML,
                     reply_markup=keyboard,
                     )
@@ -72,8 +70,8 @@ async def collect_message(cmd, message, gp):
 
             elif attch.type == 'voice':
                 result = await message.answer_voice(
-                    attch.cache_id or aiogram.types.InputFile(attch.file_path), 
-                    caption=attch.description, 
+                    attch.cache_id or aiogram.types.InputFile(attch.file_path),
+                    caption=attch.description,
                     reply_markup=keyboard,
                     )
                 attch.cache_id = result.voice.file_id
@@ -84,14 +82,14 @@ async def collect_message(cmd, message, gp):
                     attch.options,
                     type='quiz',
                     correct_option_id = attch.answer_indexes[0],
-                    explanation=attch.description, 
+                    explanation=attch.description,
                     reply_markup=keyboard,
                     )
 
             elif attch.type == None:
                 result = await message.answer_document(
-                    attch.cache_id or aiogram.types.InputFile(attch.file_path), 
-                    caption=attch.description, 
+                    attch.cache_id or aiogram.types.InputFile(attch.file_path),
+                    caption=attch.description,
                     parse_mode=ParseMode.HTML,
                     reply_markup=keyboard,
                     )
@@ -102,7 +100,7 @@ async def collect_message(cmd, message, gp):
             for item in attch:
                 if item.type == 'image':
                     media.attach_photo(
-                        item.cache_id or aiogram.types.InputFile(item.file_path), 
+                        item.cache_id or aiogram.types.InputFile(item.file_path),
                         caption=item.description
                         )
                 elif item.type == 'audio':
@@ -114,12 +112,12 @@ async def collect_message(cmd, message, gp):
                         )
                 elif item.type == 'video':
                     media.attach_video(
-                        item.cache_id or aiogram.types.InputFile(item.file_path), 
+                        item.cache_id or aiogram.types.InputFile(item.file_path),
                         caption=item.description
                         )
                 elif item.type == None:
                     media.attach_document(
-                        item.cache_id or aiogram.types.InputFile(item.file_path), 
+                        item.cache_id or aiogram.types.InputFile(item.file_path),
                         caption=item.description
                         )
             result = await message.answer_media_group(media=media)
@@ -150,20 +148,19 @@ async def startup(dp):
         )
 
     await dp.bot.delete_my_commands()
-    
+
+
 def start(path=None):
     # # если запускаемся с exe
     if path:
-        print(f'path {path=}')
         setting.bot = fg_bot = Bot(path)
 
     elif path is None:
         fg_bot = Bot(setting.args.bot, proxy=setting.args.proxy, token=setting.args.token)
-    
+
     ai_bot = aiogram.Bot(token=fg_bot.token, proxy=fg_bot.proxy)
     dp = aiogram.Dispatcher(ai_bot, storage=MemoryStorage())
     dp.middleware.setup(AlbumMiddleware())
-
 
     # ai_bot.set_my_commands(BotCommand('start', 'старк'))
 
@@ -171,7 +168,6 @@ def start(path=None):
     async def get_statictics(message):
         users = database.select_users()
         count_user = len(users)
-        print(message)
         last7day = 0
         lastday = 0
         hour = 0
@@ -185,7 +181,7 @@ def start(path=None):
                         hour += 1
                         if datetime.now() - datetime.fromisoformat(item['last_activity']) < timedelta(minutes=1):
                             online += 1
-                    
+
 
         stat = f"<b><i>СТАТИСТИКА</i></b>" \
             f"\n\n<i>Активность:</i>\n - последний час: <b>{hour}</b>" \
@@ -194,7 +190,7 @@ def start(path=None):
             f"\n\n<b>Онлайн</b>: <b>{online}</b>" \
             f"\nВсего пользователей: <b>{count_user}</b>" \
 
-        
+
         await message.answer(stat, parse_mode=ParseMode.HTML)
 
 
@@ -206,13 +202,11 @@ def start(path=None):
             markup.add("Отмена")
             await ai_bot.send_message(message.from_user.id, text="Напечатайте ваше сообщение", reply_markup=markup)
             await state.set_state('newpost')
-            print(await state.get_state())
-    
+
     @dp.message_handler(filters.isAdmin, text='Отмена', state="*")
     async def cancel_sending_message(message, state=FSMContext):
         await state.finish()
         await message.answer("Рассылка отменена", reply_markup=ReplyKeyboardRemove())
-        print(await state.get_state())
 
     # триггер на медиагруппу в рассылке
     @dp.message_handler(filters.isAdmin, text='Отмена', is_media_group=True, content_types=ContentType.ANY, state='newpost')
@@ -233,7 +227,7 @@ def start(path=None):
                 media_group.attach({"media": file_id, "type": obj.content_type, "caption": obj.caption})
             except ValueError:
                 return await message.answer("This type of album is not supported by aiogram.")
-        
+
         fails = 0
         await message.answer(f'Рассылка начата...', reply_markup=ReplyKeyboardRemove())
         for each in all_users:
@@ -249,7 +243,6 @@ def start(path=None):
     async def sending_message(message, state=FSMContext):
         await state.finish()
         fails = 0
-        print(message)
         all_users = database.all_users()
         await message.answer(f'Рассылка начата...\nБудет отправлено сообщений: {len(all_users)}', reply_markup=ReplyKeyboardRemove())
         for each in all_users:
@@ -260,14 +253,12 @@ def start(path=None):
             await asyncio.sleep(0.25)
         await message.answer(f'Сообщения отправлены! [{len(all_users)-fails} из {len(all_users)}]')
 
-
     @dp.message_handler(lambda m: filters.is_command(m) or filters.is_alias(m))
     async def answer(message):
 
         if message.is_command():
             cmd = fg_bot.get_command(message.get_command())
             if cmd == 'start':
-                print(f'add user {message}')
                 database.add_user(message.from_user.id)
             gp = fg_bot.get_group_media(cmd)
         else:
@@ -277,10 +268,8 @@ def start(path=None):
         # собираю сообщения комманды
         await collect_message(cmd, message, gp)
         database.update_activity(message.from_user.id)
-    
-    aiogram.executor.start_polling(dp, skip_updates=True, on_startup=startup)
-    
 
+    aiogram.executor.start_polling(dp, skip_updates=True, on_startup=startup)
 
 
 class AlbumMiddleware(BaseMiddleware):

@@ -4,7 +4,7 @@ from datetime import datetime as dt
 
 if getattr(sys, 'frozen', False):
     application_path = os.path.dirname(sys.executable)
-    # print(f'{sys.executable=}')
+
 elif __file__:
     application_path = os.path.dirname(__file__)
 
@@ -29,7 +29,6 @@ con = sqlite3.connect(os.path.join(application_path, DATABASE_NAME))
 con.row_factory = dict_factory
 cur = con.cursor()
 cur.executescript(sql_create_table)
-print("База данных подключена")
 
 def add_user(user_id):
     cur.execute("""

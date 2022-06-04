@@ -10,7 +10,7 @@ parser.add_argument('--token', '-t')
 args = parser.parse_args()
 
 setting.args = args
-print(f"Запускаю бота")
 setting.bot = types.Bot(args.bot, proxy=args.proxy, token=args.token)
 
+print('foldergram...')
 bot.start()

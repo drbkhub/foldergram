@@ -7,7 +7,6 @@ def isAdmin(message):
 
 def is_command(message):
     if setting.bot.get_command(message.get_command()):
-        print(bool(setting.bot.get_command(message.get_command())))
         return True
     return False
 

@@ -40,20 +40,21 @@ class Attachment:
         self.type = None
         self.cache_id = None
         self.location = [None, None]
-        self.number = [None, None, None] # phone, first name, last name
+        self.number = [None, None, None]  # phone, first name, last name
         # quiz
         self.question = None
         self.options = []
-        self.answer_indexes = [] 
+        self.answer_indexes = []
 
         self._parse()
 
-        logging.debug(f"[class Attachment] {self.file_path=}")
-        logging.debug(f"[class Attachment] {len(self.description)=}")
-        logging.debug(f"[class Attachment] {self.type=}")
+        # logging.debug(f"[class Attachment] {self.file_path=}")
+        # logging.debug(f"[class Attachment] {len(self.description)=}")
+        # logging.debug(f"[class Attachment] {self.type=}")
 
     def __str__(self) -> str:
         return f'Attachment("{self.file_path}")'
+
     __repr__ = __str__
 
     @property
@@ -70,10 +71,10 @@ class Attachment:
         if os.path.isfile(desc_file) and desc_file != self.file_path:
             with open(desc_file, encoding=ENCODING) as f:
                 self.description = f.read()
-        
+
         current_ext = os.path.splitext(self.file_path)[1].lower()
         for _type, exts in self.extensions.items():
-        
+
             # Известные файлы, которые можно отправить НЕ как документ
             if current_ext in exts:
                 # сообщение, по-умолчанию текстовый документ - сообщение телеграма
@@ -83,12 +84,12 @@ class Attachment:
                         self.message = f.read()
                 # местоположение
                 elif _type == 'location':
-                    self.type = _type # place location
+                    self.type = _type  # place location
                     with open(self.file_path, encoding=ENCODING) as f:
                         self.location = list(map(float, f.read().splitlines()[:2]))
                 # визитка
                 elif _type == 'number':
-                    self.type = _type # phone number
+                    self.type = _type  # phone number
                     with open(self.file_path, encoding=ENCODING) as f:
                         data = f.read().splitlines()[:3]
                     last_name = None
@@ -112,7 +113,7 @@ class Attachment:
                             item = item[1:].strip()
                         self.options.append(item)
 
-                
+
                 elif _type == 'video':
                     self.type = _type
 
@@ -128,7 +129,7 @@ class Attachment:
             # поумолчанию все неизвестные файлы - документы, self.type = None
             # else:
             #     pass
-    
+
     @classmethod
     def parse_attachments(cls, command_path):
         folders, files = sort_like_explorer(command_path)
@@ -143,14 +144,14 @@ class Attachment:
 
         attachments = []
         for file in files:
-            logging.debug(f"[class Command] add attach: {file}")
+            # logging.debug(f"[class Command] add attach: {file}")
             attachments.append(Attachment(os.path.join(command_path, file)))
         return attachments
 
 
 class Command:
     def __init__(self, command_path, name=None):
-        
+
         if name is None:
             self.name = os.path.split(command_path)[1]
             self.full_name = '/' + self.name
@@ -163,7 +164,7 @@ class Command:
         self.aliases = []
         self.keyboard = None
 
-        logging.debug(f"[class Command] {command_path=}")
+        # logging.debug(f"[class Command] {command_path=}")
 
         self._parse()
 
@@ -181,12 +182,11 @@ class Command:
         root_command = os.path.join(root_path, COMMAND_DIR)
         commands = []
         folders, _ = sort_like_explorer(root_command)
-        logging.debug(f"[class Command] {folders=}")
+        # logging.debug(f"[class Command] {folders=}")
         sublen = len(root_command) + 1
         for path, folders, files in os.walk(root_command):
             root = path[sublen:]
             if os.path.split(path)[1].lower() != SETTING_DIR:
-                # print(path, '_'.join(root.split(os.path.sep)))
                 commands.append(cls(path, name='_'.join(root.split(os.path.sep))))
 
         return commands
@@ -197,16 +197,16 @@ class Command:
         if os.path.isfile(alias_file):
             with open(alias_file, encoding=ENCODING) as f:
                 self.aliases.extend([line.lower() for line in f.read().splitlines() if line != ''])
-                logging.debug(f"[class Command] found aliases: {len(self.aliases)}")
-    
+                # logging.debug(f"[class Command] found aliases: {len(self.aliases)}")
+
     def _parse_keyboard(self):
         keyboard_file = os.path.join(self.command_path, SETTING_DIR, 'keyboard.txt')
         if os.path.isfile(keyboard_file):
             with open(keyboard_file, encoding=ENCODING) as f:
                 # self.keyboard = [line for line in f.read().splitlines() if line != '']
-                self.keyboard = [[row.strip() for row in line.split("|") if row.strip() != ''] for line in f.read().splitlines() if line != '']
-                print("keyboard", self.keyboard)
-                logging.debug(f"[class Command] found keyboard buttons: {len(self.keyboard)}")
+                self.keyboard = [[row.strip() for row in line.split("|") if row.strip() != ''] for line in
+                                 f.read().splitlines() if line != '']
+                # logging.debug(f"[class Command] found keyboard buttons: {len(self.keyboard)}")
 
     def _parse(self):
         # parse attachment 
@@ -216,6 +216,7 @@ class Command:
         # parse keyboars buttons
         self._parse_keyboard()
 
+
 class Bot:
     def __init__(self, root_path, proxy=None, token=None):
         self.root_path = os.path.abspath(root_path)
@@ -224,19 +225,21 @@ class Bot:
         self.admins = []
         self.commands = []
 
-        logging.debug(f"[class Bot] {self.root_path=}")
+        # logging.debug(f"[class Bot] {self.root_path=}")
 
         self._parse()
 
-        logging.debug(f"[class Bot] {self.commands=}")
-        logging.debug(f"[class Bot] {self.token=}")
-        logging.debug(f"[class Bot] {self.proxy=}")
+        # logging.debug(f"[class Bot] {self.commands=}")
+        # logging.debug(f"[class Bot] {self.token=}")
+        # logging.debug(f"[class Bot] {self.proxy=}")
 
     def _get_token(self):
         if os.path.isfile(os.path.join(self.root_path, TOKEN_FILE)) and self.token is None:
             logging.debug(f"[class Bot._get_token] file exists")
             with open(os.path.join(self.root_path, TOKEN_FILE), encoding=ENCODING) as token_file:
                 self.token = token_file.read().strip()
+        if not self.token:
+            raise ValueError(f"Не указан токен! Нужно указать токен в файле {TOKEN_FILE}")
 
     def _get_proxy(self):
         if os.path.isfile(os.path.join(self.root_path, PROXY_FILE)) and self.proxy is None:
@@ -272,7 +275,7 @@ class Bot:
         for cmd in self.commands:
             alises.extend(cmd.aliases)
         return alises
-    
+
     def get_command_by_alias(self, name):
         for cmd in self.commands:
             if name in cmd.aliases:
@@ -288,13 +291,13 @@ class Bot:
                 # не группируются следующие типы
                 if item.type in ('text', 'location', 'text', 'number', 'voice', 'quiz'):
                     group.append(item)
-                
+
                 elif not group:
                     group.append(item)
 
                 elif not isinstance(group[-1], list) and group[-1].type == item.type:
                     group[-1] = [group[-1], item]
-                
+
                 elif isinstance(group[-1], list) and len(group[-1]) < 10 and group[-1][0].type == item.type:
                     group[-1].append(item)
 
@@ -304,13 +307,11 @@ class Bot:
         return group
 
 
-
 def sort_like_explorer(dir_path: str) -> tuple[list[str], list[str]]:
     dirs, files = [], []
     dir_and_file_list = os.listdir(dir_path)
     dir_and_file_list.sort(key=lambda x: len(x))
     dir_and_file_list.sort()
-
 
     # first dirs and then files
     for item in dir_and_file_list:
